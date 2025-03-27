@@ -29,14 +29,14 @@ class PyImageSearchANPR:
         # (i.e., the license plate itself)
         rectKern = cv2.getStructuringElement(cv2.MORPH_RECT, (13, 5))
         blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, rectKern)
-        self.debug_imshow("Blackhat", blackhat)
+        #self.debug_imshow("Blackhat", blackhat)
 
         # next, find regions in the image that are light
         squareKern = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
         light = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, squareKern)
         light = cv2.threshold(light, 0, 255,
             cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-        self.debug_imshow("Light Regions", light)
+        #self.debug_imshow("Light Regions", light)
 
         # compute the Scharr gradient representation of the blackhat
         # image in the x-direction and then scale the result back to
@@ -47,7 +47,7 @@ class PyImageSearchANPR:
         (minVal, maxVal) = (np.min(gradX), np.max(gradX))
         gradX = 255 * ((gradX - minVal) / (maxVal - minVal))
         gradX = gradX.astype("uint8")
-        self.debug_imshow("Scharr", gradX)
+        #self.debug_imshow("Scharr", gradX)
 
         # blur the gradient representation, applying a closing
         # operation, and threshold the image using Otsu's method
@@ -55,20 +55,20 @@ class PyImageSearchANPR:
         gradX = cv2.morphologyEx(gradX, cv2.MORPH_CLOSE, rectKern)
         thresh = cv2.threshold(gradX, 0, 255,
             cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-        self.debug_imshow("Grad Thresh", thresh)
+        #self.debug_imshow("Grad Thresh", thresh)
 
         # perform a series of erosions and dilations to clean up the
         # thresholded image
         thresh = cv2.erode(thresh, None, iterations=2)
         thresh = cv2.dilate(thresh, None, iterations=2)
-        self.debug_imshow("Grad Erode/Dilate", thresh)
+        #self.debug_imshow("Grad Erode/Dilate", thresh)
 
         # take the bitwise AND between the threshold result and the
         # light regions of the image
         thresh = cv2.bitwise_and(thresh, thresh, mask=light)
         thresh = cv2.dilate(thresh, None, iterations=2)
         thresh = cv2.erode(thresh, None, iterations=1)
-        self.debug_imshow("Final", thresh, waitKey=True)
+        #self.debug_imshow("Final", thresh, waitKey=True)
 
         # find contours in the thresholded image and sort them by
         # their size in descending order, keeping only the largest
@@ -93,8 +93,7 @@ class PyImageSearchANPR:
             # the bounding box to derive the aspect ratio
             (x, y, w, h) = cv2.boundingRect(c)
             ar = w / float(h)
-            
-            print(ar)
+
             # check to see if the aspect ratio is rectangular
             if ar >= self.minAR and ar <= self.maxAR:
                 # store the license plate contour and extract the
@@ -114,8 +113,8 @@ class PyImageSearchANPR:
                 # display any debugging information and then break
                 # from the loop early since we have found the license
                 # plate region
-                self.debug_imshow("License Plate", licensePlate)
-                self.debug_imshow("ROI", roi, waitKey=True)
+                #self.debug_imshow("License Plate", licensePlate)
+                #self.debug_imshow("ROI", roi, waitKey=True)
                 break
 
         # return a 2-tuple of the license plate ROI and the contour
@@ -133,6 +132,14 @@ class PyImageSearchANPR:
         # return the built options string
         return options
 
+    def transform_img(self, img):
+        gaussian_blur = cv2.GaussianBlur(
+            img, (5, 5), 0
+        )
+        self.debug_imshow("gaussian_blur", gaussian_blur)
+        return gaussian_blur
+
+
     def find_and_ocr(self, image, psm=7, clearBorder=False):
         # initialize the license plate text
         lpText = None
@@ -148,10 +155,13 @@ class PyImageSearchANPR:
         # only OCR the license plate if the license plate ROI is not
         # empty
         if lp is not None:
+
+            transformed_img = self.transform_img(lp)
+
             # OCR the license plate
             options = self.build_tesseract_options(psm=psm)
-            lpText = pytesseract.image_to_string(lp, config=options)
-            self.debug_imshow("License Plate", lp)
+            lpText = pytesseract.image_to_string(transformed_img, config=options)
+            self.debug_imshow("License Plate", transformed_img)
 
         # return a 2-tuple of the OCR'd license plate text along with
         # the contour associated with the license plate region

@@ -4,6 +4,10 @@ from imutils import paths
 import argparse
 import imutils
 import cv2
+import os
+
+list_license_plates = []
+predicted_license_plates = []
 
 def cleanup_text(text):
     # strip out non-ASCII text so we can draw the text on the image
@@ -28,8 +32,29 @@ anpr = PyImageSearchANPR(debug=args["debug"] > 0, minAR=3, maxAR=6)
 # grab all image paths in the input directory
 imagePaths = sorted(list(paths.list_images(args["input"])))
 
+def calculate_predicted_accuracy(actual_list, predicted_list):
+    for actual_plate, predict_plate in zip(actual_list, predicted_list):
+        accuracy = "0 %"
+        num_matches = 0
+        if actual_plate.strip() == predict_plate.strip():
+            accuracy = "100 %"
+        else:
+            if len(actual_plate) == len(predict_plate):
+                for a, p in zip(actual_plate, predict_plate):
+                    if a.strip() == p.strip():
+                        num_matches += 1
+                accuracy = str(round((num_matches / len(actual_plate)), 2) * 100)
+                accuracy += "%"
+        print("     ", actual_plate.strip(), "\t\t\t", predict_plate.strip(), "\t\t  ", accuracy)
+
+
 # loop over all image paths in the input directory
 for imagePath in imagePaths:
+
+    license_plate_file = imagePath.split("/")[-1]
+    license_plate, _ = os.path.splitext(license_plate_file)
+
+    list_license_plates.append(license_plate)
     # load the input image from disk and resize it
     image = cv2.imread(imagePath)
     image = imutils.resize(image, width=600)
@@ -51,5 +76,10 @@ for imagePath in imagePaths:
             cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
         # show the output ANPR image
         print("[INFO] {}".format(lpText))
+        predicted_license_plates.append(lpText)
         cv2.imshow("Output ANPR", image)
         cv2.waitKey(0)
+
+print("Actual License Plate", "\t", "Predicted License Plate", "\t", "Accuracy")
+print("--------------------", "\t", "-----------------------", "\t", "--------")
+calculate_predicted_accuracy(list_license_plates, predicted_license_plates)
