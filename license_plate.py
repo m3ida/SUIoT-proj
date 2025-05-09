@@ -4,6 +4,9 @@ import cv2
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
+import tensorflow as tf
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 imagePaths = sorted(list(paths.list_images("./license_plates/group1")))
 decoder = [
@@ -18,6 +21,7 @@ cropped_licenses = []
 model = YOLO("./license_detection.pt")
 modelDigits = YOLO("./digit_detection_font4.pt")
 modelClassifyDigits = YOLO("./digit_classification_L.pt")
+classification_model = tf.saved_model.load("./best_model")
 
 def debug_imshow(title, image, waitKey=False):
     cv2.imshow(title, image)
@@ -32,7 +36,7 @@ def resize_with_padding(image):
     new_size = (width * 10, height * 10)
     image = image.resize(new_size, Image.LANCZOS)
 
-    target_size = (100, 75)
+    target_size = (80, 60)
     fill_color = (255, 255, 255)
 
     image.thumbnail(target_size, Image.LANCZOS)
@@ -84,7 +88,16 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
 
                         class_res = modelClassifyDigits(cropped_character)
 
-                        print(decoder[int(class_res[0].probs.top1)])
+                        print("Prediction YOLO",decoder[int(class_res[0].probs.top1)])
 
+                        resized_img = resize_with_padding(cropped_character)
+
+                        input_arr = tf.keras.utils.img_to_array(resized_img)  # (height, width, channels)
+                        img_tensor = np.expand_dims(input_arr, axis=0)
+
+                        imageClassified = classification_model(img_tensor)
+                        predictions = np.argmax(imageClassified, axis=1)
+
+                        print("Prediction LENNET:", decoder[predictions[0]])
                         debug_imshow("Character",  np.array(cropped_character), waitKey=True)  # display to screen
 
