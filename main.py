@@ -28,14 +28,13 @@ def get_distance():
 
     print(3)
 
-    #pulse_start = 0
     # Wait for echo to go high
     while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
 
     print(4)
 
-    #pulse_end = 0
+
     # Wait for echo to go low
     while GPIO.input(ECHO) == 1:
         pulse_end = time.time()
