@@ -72,6 +72,8 @@ def resize_with_padding(image):
 
 def analyse_image(image):
     results = model([image])
+    if(len(results) == 0):
+        print("No License Plate found")
     for id2,result in enumerate(results):
         boxes = result.boxes
 
@@ -177,6 +179,7 @@ try:
 
         if(dist < 1500):
             image = picam2.capture_array()
+            analyse_image(image)
 
         time.sleep(1)
 
