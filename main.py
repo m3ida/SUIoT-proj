@@ -31,12 +31,12 @@ def distance():
     print(5)
 
     # save StartTime
-    while GPIO.input(GPIO_ECHO) == 0 or time.time() - StartTime > 20 :
+    while GPIO.input(GPIO_ECHO) == 0 or time.time() - StartTime > 2 :
         StartTime = time.time()
     print(6)
 
     # save time of arrival
-    while GPIO.input(GPIO_ECHO) == 1  or time.time() - StopTime > 20:
+    while GPIO.input(GPIO_ECHO) == 1  or time.time() - StopTime > 2:
         StopTime = time.time()
     print(7)
 
