@@ -28,6 +28,7 @@ def distance():
 
     StartTime = time.time()
     StopTime = time.time()
+    time.sleep(2)
     print(time.time() - StartTime)
 
     # save StartTime
