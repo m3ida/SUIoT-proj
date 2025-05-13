@@ -41,8 +41,11 @@ def get_distance():
 
 try:
     while True:
-        dist = get_distance()
-        print(f"Distance: {dist} cm")
+        try:
+            dist = get_distance()
+            print(f"Distance: {dist} cm")
+        except TimeoutError as e:
+            print(f"Measurement error: {e}")
         time.sleep(1)
 
 except KeyboardInterrupt:
