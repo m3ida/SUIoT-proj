@@ -1,66 +1,52 @@
 import RPi.GPIO as GPIO
 import time
 
-# Set GPIO mode
+#GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
 
-# Define GPIO pins
-TRIG = 7
-ECHO = 0
+#set GPIO Pins
+GPIO_TRIGGER = 7
+GPIO_ECHO = 0
 
-# Set up GPIO pins
-GPIO.setup(TRIG, GPIO.OUT)
-GPIO.setup(ECHO, GPIO.IN)
+#set GPIO direction (IN / OUT)
+GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+GPIO.setup(GPIO_ECHO, GPIO.IN)
 
-def get_distance():
-    # Ensure trigger is low
-    print(0)
-    GPIO.output(TRIG, False)
-    print(1)
+def distance():
+    # set Trigger to HIGH
+    GPIO.output(GPIO_TRIGGER, True)
 
-    time.sleep(0.05)
-    print(2)
+    # set Trigger after 0.01ms to LOW
+    time.sleep(0.00001)
+    GPIO.output(GPIO_TRIGGER, False)
 
-    # Send a 10us pulse to trigger
-    GPIO.output(TRIG, True)
-    time.sleep(0.00001)  # 10us
-    GPIO.output(TRIG, False)
+    StartTime = time.time()
+    StopTime = time.time()
 
-    print(3)
+    # save StartTime
+    while GPIO.input(GPIO_ECHO) == 0:
+        StartTime = time.time()
 
-    # Wait for echo to go high
-    while GPIO.input(ECHO) == 0:
-        pulse_start = time.time()
+    # save time of arrival
+    while GPIO.input(GPIO_ECHO) == 1:
+        StopTime = time.time()
 
-    print(4)
-
-
-    # Wait for echo to go low
-    while GPIO.input(ECHO) == 1:
-        pulse_end = time.time()
-
-    print(5)
-
-
-    # Calculate pulse duration
-    pulse_duration = pulse_end - pulse_start
-
-    # Distance calculation: Speed of sound = 34300 cm/s
-    distance = pulse_duration * 17150
-    distance = round(distance, 2)
+    # time difference between start and arrival
+    TimeElapsed = StopTime - StartTime
+    # multiply with the sonic speed (34300 cm/s)
+    # and divide by 2, because there and back
+    distance = (TimeElapsed * 34300) / 2
 
     return distance
 
-try:
-    while True:
-        print(GPIO.input(ECHO))
-        try:
-            dist = get_distance()
-            print(f"Distance: {dist} cm")
-        except TimeoutError as e:
-            print(f"Measurement error: {e}")
-        time.sleep(1)
+if __name__ == '__main__':
+    try:
+        while True:
+            dist = distance()
+            print ("Measured Distance = %.1f cm" % dist)
+            time.sleep(1)
 
-except KeyboardInterrupt:
-    print("Measurement stopped by user")
-    GPIO.cleanup()
+        # Reset by pressing CTRL + C
+    except KeyboardInterrupt:
+        print("Measurement stopped by User")
+        GPIO.cleanup()
