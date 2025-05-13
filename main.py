@@ -41,6 +41,7 @@ def get_distance():
 
 try:
     while True:
+        print(GPIO.input(ECHO))
         try:
             dist = get_distance()
             print(f"Distance: {dist} cm")
