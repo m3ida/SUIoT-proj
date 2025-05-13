@@ -20,7 +20,7 @@ list_license_plates= []
 cropped_licenses = []
 model = YOLO("./license_detection.pt")
 modelDigits = YOLO("./digit_detection_font4.pt")
-modelClassifyDigits = YOLO("./digit_classification_L.pt")
+modelClassifyDigits = YOLO("./digit_classification_X.pt")
 classification_model = tf.saved_model.load("./best_model")
 
 def debug_imshow(title, image, waitKey=False):
@@ -71,6 +71,9 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
 
             resultsDigits = modelDigits([license_plate_crop])
 
+            license_lennet = ""
+            license_yolo = ""
+
             for id,r in enumerate(resultsDigits):
                 boxes = r.boxes
 
@@ -89,10 +92,11 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
 
                 filtered_boxes = [
                 coords for coords in sorted_boxes
-                if coords[3] > 0.5 * avg_height 
-                and 0.3 < coords[1] / img_h < 0.7 
-                and 0.05 < coords[0] / img_w < 0.85  
+                if coords[3] > 0.5 * avg_height
+                and 0.3 < coords[1] / img_h < 0.7
+                and 0.05 < coords[0] / img_w < 0.85
             ]
+
 
                 for coords in filtered_boxes:
                     x = coords[0]
@@ -104,6 +108,7 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
 
                     class_res = modelClassifyDigits(cropped_character)
                     print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
+                    license_yolo += decoder[int(class_res[0].probs.top1)]
 
                     resized_img = resize_with_padding(cropped_character)
                     input_arr = tf.keras.utils.img_to_array(resized_img)
@@ -113,5 +118,11 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
                     predictions = np.argmax(imageClassified, axis=1)
 
                     print("Prediction LENNET:", decoder[predictions[0]])
-                    debug_imshow("Character", np.array(cropped_character), waitKey=True)
+                    license_lennet += decoder[predictions[0]]
+
+            print("Prediction LENNET:", license_lennet)
+            print("Prediction YOLO:", license_yolo)
+
+            debug_imshow("License Plate", license_plate_crop, waitKey=True)
+
 
