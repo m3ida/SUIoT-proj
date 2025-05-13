@@ -9,7 +9,7 @@ TRIG = 23
 ECHO = 24
 
 # Set up GPIO pins
-# GPIO.setup(TRIG, GPIO.OUT)
+GPIO.setup(TRIG, GPIO.OUT)
 # GPIO.setup(ECHO, GPIO.IN)
 
 # def get_distance():
@@ -54,7 +54,7 @@ ECHO = 24
 
 try:
     while True:
-        print(GPIO.input(ECHO))
+        # print(GPIO.input(ECHO))
         try:
             GPIO.output(TRIG, False)
             time.sleep(1)
