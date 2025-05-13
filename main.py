@@ -6,7 +6,7 @@ GPIO.setmode(GPIO.BCM)
 
 # Define GPIO pins
 TRIG = 7
-ECHO = 11
+ECHO = 0
 
 # Set up GPIO pins
 GPIO.setup(TRIG, GPIO.OUT)
