@@ -192,10 +192,10 @@ try:
 
         if(dist < 1500):
             image = picam2.capture_array()
-            print("image captured")
+            print("image captured, waiting 10s before checking again")
             time.sleep(10)
 
-            # analyse_image(image)
+            analyse_image(image)
 
         time.sleep(1)
 
