@@ -35,7 +35,7 @@ def cleanup_text(text):
 list_license_plates= []
 cropped_licenses = []
 model = YOLO("./license_detection.pt")
-# modelDigits = YOLO("./digit_detection_font4.pt")
+modelDigits = YOLO("./digit_detection_font4.pt")
 # # modelClassifyDigits = YOLO("./digit_classification_X.pt")
 # classification_model = tflite.Interpreter(model_path="model.tflite")
 # classification_model.allocate_tensors()
@@ -106,51 +106,50 @@ def analyse_image(image):
 
             resultsDigits = modelDigits([license_plate_crop])
 
-            # license_lennet = ""
-            # # license_yolo = ""
+            license_lennet = ""
+            # license_yolo = ""
 
-            # for id,r in enumerate(resultsDigits):
-            #     boxes = r.boxes
+            for id,r in enumerate(resultsDigits):
+                boxes = r.boxes
 
-            #     if(len(boxes.xywh)>0):
-            #         xywh_cpu = boxes.xywh.to('cpu').numpy()
+                if(len(boxes.xywh)>0):
+                    xywh_cpu = boxes.xywh.to('cpu').numpy()
 
-            #         print(xywh_cpu)
+                    print(xywh_cpu)
 
-            #     sorted_boxes = sorted(xywh_cpu, key=lambda x: x[0])
+                sorted_boxes = sorted(xywh_cpu, key=lambda x: x[0])
+
+                heights = [coords[3] for coords in sorted_boxes]
+                avg_height = np.mean(heights)
+
+                img_h, img_w = license_plate_crop.shape[:2]
+
+                filtered_boxes = [
+                coords for coords in sorted_boxes
+                if coords[3] > 0.5 * avg_height
+                and 0.3 < coords[1] / img_h < 0.7
+                and 0.05 < coords[0] / img_w < 0.85
+            ]
 
 
-            #     heights = [coords[3] for coords in sorted_boxes]
-            #     avg_height = np.mean(heights)
+                for coords in filtered_boxes:
+                    x = coords[0]
+                    y = coords[1]
+                    w = coords[2]
+                    h = coords[3]
 
-            #     img_h, img_w = license_plate_crop.shape[:2]
+                    cropped_character = r.orig_img[int(y-h/2):int(y+h/2), int(x-w/2):int(x+w/2)]
 
-            #     filtered_boxes = [
-            #     coords for coords in sorted_boxes
-            #     if coords[3] > 0.5 * avg_height
-            #     and 0.3 < coords[1] / img_h < 0.7
-            #     and 0.05 < coords[0] / img_w < 0.85
-            # ]
+                    # class_res = modelClassifyDigits(cropped_character)
+                    # print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
+                    # license_yolo += decoder[int(class_res[0].probs.top1)]
 
+                    #prediction_lennet = classify_character_tflite(cropped_character)
+                    #print("Prediction LENNET:", prediction_lennet)
+                    #license_lennet += prediction_lennet
 
-            #     for coords in filtered_boxes:
-            #         x = coords[0]
-            #         y = coords[1]
-            #         w = coords[2]
-            #         h = coords[3]
-
-            #         cropped_character = r.orig_img[int(y-h/2):int(y+h/2), int(x-w/2):int(x+w/2)]
-
-            #         # class_res = modelClassifyDigits(cropped_character)
-            #         # print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
-            #         # license_yolo += decoder[int(class_res[0].probs.top1)]
-
-            #         prediction_lennet = classify_character_tflite(cropped_character)
-            #         print("Prediction LENNET:", prediction_lennet)
-            #         license_lennet += prediction_lennet
-
-            # print("Prediction LENNET:", license_lennet)
-            # # print("Prediction YOLO:", license_yolo)
+            print("Prediction LENNET:", license_lennet)
+            # print("Prediction YOLO:", license_yolo)
 
             # debug_imshow("License Plate", license_plate_crop, waitKey=True)
         else:
@@ -192,9 +191,10 @@ try:
 
         if(dist < 1500):
             image = picam2.capture_array()
-            print("image captured, waiting 10s before checking again")
+            print("image captured")
             time.sleep(10)
 
+            print("waiting 10s before checking again")
             analyse_image(image)
 
         time.sleep(1)
