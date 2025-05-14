@@ -153,6 +153,9 @@ def analyse_image(image):
             # # print("Prediction YOLO:", license_yolo)
 
             # debug_imshow("License Plate", license_plate_crop, waitKey=True)
+        else:
+            print("No License Plate found")
+
 
 def get_distance():
     # Ensure trigger is low
