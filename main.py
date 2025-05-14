@@ -191,6 +191,7 @@ try:
 
         if(dist < 1500):
             image = picam2.capture_array()
+            picam2.capture_file("test.jpg")
             print("image captured")
             time.sleep(10)
 
