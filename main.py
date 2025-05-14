@@ -4,7 +4,7 @@ from picamera2 import Picamera2
 from ultralytics import YOLO
 import numpy as np
 from PIL import Image
-import tflite_runtime.interpreter as tflite
+# import tensorflow as tf
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -36,28 +36,18 @@ list_license_plates= []
 cropped_licenses = []
 model = YOLO("./license_detection.pt")
 modelDigits = YOLO("./digit_detection_font4.pt")
-# # modelClassifyDigits = YOLO("./digit_classification_X.pt")
-classification_model = tflite.Interpreter(model_path="model.tflite")
-classification_model.allocate_tensors()
-input_details = classification_model.get_input_details()
-output_details = classification_model.get_output_details()
+modelClassifyDigits = YOLO("./digit_classification_X.pt")
+# classification_model = tf.saved_model.load("./best_model")
 
-def classify_character_tflite(image):
-    resized_img = resize_with_padding(image)
-    input_arr = np.asarray(resized_img).astype(np.float32)
+# def classify_character(image):
+#     resized_img = resize_with_padding(image)
+#     input_arr = tf.keras.utils.img_to_array(resized_img)
+#     img_tensor = np.expand_dims(input_arr, axis=0)
 
-    # Normalize if model requires (assumes [0,1] input)
-    input_arr = input_arr / 255.0
+#     imageClassified = classification_model(img_tensor)
+#     predictions = np.argmax(imageClassified, axis=1)
 
-    input_tensor = np.expand_dims(input_arr, axis=0)
-
-    classification_model.set_tensor(input_details[0]['index'], input_tensor)
-    classification_model.invoke()
-
-    output_data = classification_model.get_tensor(output_details[0]['index'])
-    prediction = np.argmax(output_data)
-
-    return decoder[prediction]
+#     return decoder[predictions[0]]
 
 def debug_imshow(title, image, waitKey=False):
     #cv2.imshow(title, image)
@@ -104,6 +94,9 @@ def analyse_image(image):
 
             license_plate_crop = result.orig_img[int(y-h/2-5):int(y+h/2+5), int(x-w/2-5):int(x+w/2+5)]
 
+            im = Image.fromarray(license_plate_crop)
+            im.save("license_plate_crop.jpeg")
+
             resultsDigits = modelDigits([license_plate_crop])
 
             license_lennet = ""
@@ -140,13 +133,13 @@ def analyse_image(image):
 
                     cropped_character = r.orig_img[int(y-h/2):int(y+h/2), int(x-w/2):int(x+w/2)]
 
-                    # class_res = modelClassifyDigits(cropped_character)
-                    # print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
-                    # license_yolo += decoder[int(class_res[0].probs.top1)]
+                    class_res = modelClassifyDigits(cropped_character)
+                    print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
+                    license_yolo += decoder[int(class_res[0].probs.top1)]
 
-                    prediction_lennet = classify_character_tflite(cropped_character)
-                    print("Prediction LENNET:", prediction_lennet)
-                    license_lennet += prediction_lennet
+                    # prediction_lennet = classify_character(cropped_character)
+                    # print("Prediction LENNET:", prediction_lennet)
+                    # license_lennet += prediction_lennet
 
             print("Prediction LENNET:", license_lennet)
             # print("Prediction YOLO:", license_yolo)
