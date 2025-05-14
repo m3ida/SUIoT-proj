@@ -7,7 +7,7 @@ import cv2
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -40,10 +40,30 @@ cropped_licenses = []
 model = YOLO("./license_detection.pt")
 modelDigits = YOLO("./digit_detection_font4.pt")
 modelClassifyDigits = YOLO("./digit_classification_X.pt")
-classification_model = tf.saved_model.load("./best_model")
+classification_model = tflite.Interpreter(model_path="model.tflite")
+classification_model.allocate_tensors()
+input_details = classification_model.get_input_details()
+output_details = classification_model.get_output_details()
+
+def classify_character_tflite(image):
+    resized_img = resize_with_padding(image)
+    input_arr = np.asarray(resized_img).astype(np.float32)
+
+    # Normalize if model requires (assumes [0,1] input)
+    input_arr = input_arr / 255.0
+
+    input_tensor = np.expand_dims(input_arr, axis=0)
+
+    classification_model.set_tensor(input_details[0]['index'], input_tensor)
+    classification_model.invoke()
+
+    output_data = classification_model.get_tensor(output_details[0]['index'])
+    prediction = np.argmax(output_data)
+
+    return decoder[prediction]
 
 def debug_imshow(title, image, waitKey=False):
-    cv2.imshow(title, image)
+    #cv2.imshow(title, image)
 
     if waitKey:
         # cv2.waitKey(0)
@@ -130,15 +150,9 @@ def analyse_image(image):
                     print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
                     license_yolo += decoder[int(class_res[0].probs.top1)]
 
-                    resized_img = resize_with_padding(cropped_character)
-                    input_arr = tf.keras.utils.img_to_array(resized_img)
-                    img_tensor = np.expand_dims(input_arr, axis=0)
-
-                    imageClassified = classification_model(img_tensor)
-                    predictions = np.argmax(imageClassified, axis=1)
-
-                    print("Prediction LENNET:", decoder[predictions[0]])
-                    license_lennet += decoder[predictions[0]]
+                    prediction_lennet = classify_character_tflite(cropped_character)
+                    print("Prediction LENNET:", prediction_lennet)
+                    license_lennet += prediction_lennet
 
             print("Prediction LENNET:", license_lennet)
             print("Prediction YOLO:", license_yolo)
