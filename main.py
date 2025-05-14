@@ -173,12 +173,14 @@ def get_distance():
     return distance
 
 try:
+    print("Initialized")
     while True:
         dist = get_distance()
         print(f"Distance: {dist} cm")
 
         if(dist < 1500):
             image = picam2.capture_array()
+            print("image captured")
             analyse_image(image)
 
         time.sleep(1)

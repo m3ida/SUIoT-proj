@@ -66,6 +66,9 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
             h = xywh_cpu[0][3]
 
             license_plate_crop = result.orig_img[int(y-h/2-5):int(y+h/2+5), int(x-w/2-5):int(x+w/2+5)]
+            license_plate_crop_copy = result.orig_img.copy()
+            cv2.rectangle(license_plate_crop_copy, (int(x-w/2-5), int(y-h/2-5)), (int(x+w/2+5), int(y+h/2+5)), (0, 0, 255), 2)  # Red outline
+            debug_imshow("License Plate with Detections", license_plate_crop_copy, waitKey=True)
 
             result = model([license_plate_crop])
 
@@ -105,6 +108,10 @@ for id,imagePath in enumerate(tqdm(imagePaths)):
                     h = coords[3]
 
                     cropped_character = r.orig_img[int(y-h/2):int(y+h/2), int(x-w/2):int(x+w/2)]
+                    cropped_character_copy = r.orig_img.copy()
+                    cv2.rectangle(cropped_character_copy, (int(x-w/2-5), int(y-h/2-5)), (int(x+w/2+5), int(y+h/2+5)), (0, 0, 255), 2)  # Red outline
+                    debug_imshow("License Plate with Detections", cropped_character_copy, waitKey=True)
+                    debug_imshow("Cropped Character", cropped_character, waitKey=True)
 
                     class_res = modelClassifyDigits(cropped_character)
                     print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
