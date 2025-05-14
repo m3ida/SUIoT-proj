@@ -104,7 +104,7 @@ def analyse_image(image):
 
             license_plate_crop = result.orig_img[int(y-h/2-5):int(y+h/2+5), int(x-w/2-5):int(x+w/2+5)]
 
-            # result = model([license_plate_crop])
+            result = model([license_plate_crop])
 
             # resultsDigits = modelDigits([license_plate_crop])
 
@@ -192,6 +192,8 @@ try:
         if(dist < 1500):
             image = picam2.capture_array()
             print("image captured")
+            time.sleep(10)
+
             # analyse_image(image)
 
         time.sleep(1)
