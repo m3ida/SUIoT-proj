@@ -104,9 +104,7 @@ def analyse_image(image):
 
             license_plate_crop = result.orig_img[int(y-h/2-5):int(y+h/2+5), int(x-w/2-5):int(x+w/2+5)]
 
-            result = model([license_plate_crop])
-
-            # resultsDigits = modelDigits([license_plate_crop])
+            resultsDigits = modelDigits([license_plate_crop])
 
             # license_lennet = ""
             # # license_yolo = ""
