@@ -1,0 +1,8 @@
+xhost +local: && sudo docker run -it --ipc=host --runtime=nvidia --privileged -v /home/hugo/Desktop/SUIoT-proj:/proj -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v /tmp/argus_socket:/tmp/argus_socket  --cap-add SYS_PTRACE -e DISPLAY=$DISPLAY --rm -u root --volume="$HOME/.Xauthority:/root/.Xauthority:rw" --net=host license
+
+INSIDE DOCKER:
+export PYTHONPATH=/opt/opencv/build/lib/python3/:$PYTHONPATH
+
+cd /usr/local/lib/python3.8/dist-packages/tensorflow_cpu_aws.libs/
+rm libgomp-d22c30c5.so.1.0.0
+ln -s /usr/lib/aarch64-linux-gnu/libgomp.so.1 libgomp-d22c30c5.so.1.0.0

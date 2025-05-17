@@ -1,0 +1,16 @@
+0:00:00.000221825 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:586:init_pre:[00m Initializing GStreamer Core Library version 1.14.5
+0:00:00.000375368 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:587:init_pre:[00m Using library installed in /usr/lib/aarch64-linux-gnu
+0:00:00.000423181 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:607:init_pre:[00m Linux 87fcf4b89bf1 4.9.337-tegra #1 SMP PREEMPT Mon Nov 4 23:41:41 PST 2024 aarch64
+0:00:00.000922924 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gstmessage.c:127:_priv_gst_message_initialize:[00m init messages
+0:00:00.001850536 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gstcontext.c:84:_priv_gst_context_initialize:[00m init contexts
+0:00:00.002211008 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;36m  GST_PLUGIN_LOADING gstplugin.c:317:_priv_gst_plugin_initialize:[00m registering 0 static plugins
+0:00:00.002405281 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;36m  GST_PLUGIN_LOADING gstplugin.c:225:gst_plugin_register_static:[00m registered static plugin "staticelements"
+0:00:00.002436218 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;36m  GST_PLUGIN_LOADING gstplugin.c:227:gst_plugin_register_static:[00m added static plugin "staticelements", result: 1
+0:00:00.002482052 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00m        GST_REGISTRY gstregistry.c:1727:ensure_current_registry:[00m reading registry cache: /root/.cache/gstreamer-1.0/registry.aarch64.bin
+0:00:00.043574683 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00m        GST_REGISTRY gstregistrybinary.c:621:priv_gst_registry_binary_read_cache:[00m loaded /root/.cache/gstreamer-1.0/registry.aarch64.bin in 0.041036 seconds
+0:00:00.043830571 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00m        GST_REGISTRY gstregistry.c:1583:scan_and_update_registry:[00m Validating plugins from registry cache: /root/.cache/gstreamer-1.0/registry.aarch64.bin
+0:00:00.049986872 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00m        GST_REGISTRY gstregistry.c:1685:scan_and_update_registry:[00m Registry cache has not changed
+0:00:00.050037081 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00m        GST_REGISTRY gstregistry.c:1762:ensure_current_registry:[00m registry reading and updating done, result = 1
+0:00:00.050159373 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:807:init_post:[00m GLib runtime version: 2.56.4
+0:00:00.050184998 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:809:init_post:[00m GLib headers version: 2.56.4
+0:00:00.050204269 [332m   19[00m   0x557458ec00 [36mINFO   [00m [00;01;31m            GST_INIT gst.c:810:init_post:[00m initialized GStreamer successfully
