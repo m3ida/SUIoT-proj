@@ -29,8 +29,6 @@ decoder = [
 def cleanup_text(text):
     return "".join([c if ord(c) < 128 else "" for c in text]).strip()
 
-list_license_plates= []
-cropped_licenses = []
 model = YOLO("./license_detection.pt").to(device)
 modelDigits = YOLO("./digit_detection_font4.pt").to(device)
 modelClassifyDigits = YOLO("./digit_classification_X.pt").to(device)
@@ -159,11 +157,11 @@ def analyse_image(image):
                     cropped_character = r.orig_img[int(y-h/2):int(y+h/2), int(x-w/2):int(x+w/2)]
 
                     class_res = modelClassifyDigits(cropped_character)
-                    print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
+                    #print("Prediction YOLO", decoder[int(class_res[0].probs.top1)])
                     license_yolo += decoder[int(class_res[0].probs.top1)]
 
                     prediction_lennet = classify_character(cropped_character)
-                    print("Prediction LENNET:", prediction_lennet)
+                    #print("Prediction LENNET:", prediction_lennet)
                     license_lennet += prediction_lennet
 
             print("Prediction LENNET:", license_lennet)
@@ -203,10 +201,11 @@ def get_distance():
 
     return distance
 
-print(gstreamer_pipeline(flip_method=2, framerate=5, capture_width=3280*.66, capture_height=2464*.66, display_width=3280*.66, display_height=2464*.66))
-cam = cv2.VideoCapture(gstreamer_pipeline(flip_method=2, capture_width=1280, capture_height=960), cv2.CAP_GSTREAMER)
-gamma=3
-inv_gama= 1.0/gamma
+cam = cv2.VideoCapture(gstreamer_pipeline(flip_method=2, capture_width=3280, capture_height=2464, display_width=3280/4, display_height=2464/4, framerate=1), cv2.CAP_GSTREAMER)
+
+for _ in range(25):
+    cam.read()
+    time.sleep(0.05)
 
 if cam.isOpened():
     try:
@@ -216,28 +215,17 @@ if cam.isOpened():
             print(f"Distance: {dist} cm")
 
             if(dist < 1500): 
-               
+                for _ in range (21):
+                    cam.read() 
                 result, image = cam.read()
                 print(result)
-                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 
-                gamma_corrected = np.array(255*((image_rgb /255) ** inv_gama), dtype="uint8")
-                #image_rgb[:, :, 0] = image_rgb[:, :, 0] * 0.6  # Reduce Red channel
-                #image_rgb[:, :, 1] = image_rgb[:, :, 1] * 0.6  # Reduce Green channel
-                #image_rgb = cv2.convertScaleAbs(image_rgb, alpha=1, beta=50)
-
-                #hsv_image = cv2.cvtColor(image_rgb, cv2.COLOR_BGR2HSV)
-                #hsv_image[:, :, 1] = np.clip(hsv_image[:, :, 1] * 1.5, 0, 255)
-                #saturated_image = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
-
-                
-                im = Image.fromarray(gamma_corrected)
-                im.save("test.jpg")
+                cv2.imwrite("image.jpg", image)   
                 print("image captured")
-                time.sleep(10)
 
-                print("waiting 10s before checking again")
-                analyse_image(gamma_corrected)
+                analyse_image(image)
+                #print("waiting 10s before checking again")
+                #time.sleep(3)
             time.sleep(1)
     finally:
         cam.release()
